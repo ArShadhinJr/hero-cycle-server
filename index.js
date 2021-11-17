@@ -48,7 +48,7 @@ async function products() {
         } );
 
         // DELETE API
-        app.delete( '/products/:id', async ( req, res ) => {
+        app.delete( '/deleteProduct/:id', async ( req, res ) => {
             const id = req.params.id;
             const query = { _id: ObjectId( id ) };
             const result = await productsCollection.deleteOne( query );
@@ -61,6 +61,34 @@ async function products() {
 }
 
 products().catch( console.dir );
+
+async function reviews() {
+    try {
+        await client.connect();
+        const database = client.db( 'hero' );
+        const reviewCollection = database.collection( 'review' );
+
+        // GET API
+        app.get( '/reviews', async ( req, res ) => {
+            const cursor = reviewCollection.find( {} );
+            const review = await cursor.toArray();
+            res.send( review );
+        } );
+
+        // POST API
+        app.post( '/reviews', async ( req, res ) => {
+            const product = req.body;
+            const result = await reviewCollection.insertOne( product );
+            res.json( result )
+        } );
+
+    }
+    finally {
+        // await client.close();
+    }
+}
+
+reviews().catch( console.dir );
 
 async function carusel() {
     try {
@@ -82,6 +110,53 @@ async function carusel() {
 }
 
 carusel().catch( console.dir );
+
+
+// purchease data base 
+async function purchase() {
+    try {
+        await client.connect();
+        const database = client.db( 'hero' );
+        const purchaseCollection = database.collection( 'purchese' );
+
+        // cofirm order
+        app.post( "/purchase", async ( req, res ) => {
+            const result = await purchaseCollection.insertOne( req.body );
+            res.send( result );
+        } );
+
+        // my confirmOrder
+
+        app.get( "/myOrders/:email", async ( req, res ) => {
+            const result = await purchaseCollection
+                .find( { email: req.params.email } )
+                .toArray();
+            res.send( result );
+        } );
+
+        /// delete order
+        app.delete( "/deleteOrder/:id", async ( req, res ) => {
+            const result = await purchaseCollection.deleteOne( {
+                _id: ObjectId( req.params.id ),
+            } );
+            res.send( result );
+        } );
+
+        // all order
+        app.get( "/allOrders", async ( req, res ) => {
+            const result = await purchaseCollection.find( {} ).toArray();
+            res.send( result );
+        } );
+
+    }
+    finally {
+        // await client.close();
+    }
+}
+
+purchase().catch( console.dir );
+
+
 
 
 app.get( '/', ( req, res ) => {
