@@ -62,6 +62,44 @@ async function products() {
 
 products().catch( console.dir );
 
+async function users() {
+    try {
+        await client.connect();
+        const database = client.db( 'hero' );
+        const userCollection = database.collection( 'user' );
+
+        // GET API
+        app.get( "/user/:email", async ( req, res ) => {
+            const result = await userCollection
+                .find( { email: req.params.email } )
+                .toArray();
+            res.send( result );
+        } );
+
+        app.get( '/user', async ( req, res ) => {
+            const user = userCollection.find( {} );
+            const review = await user.toArray();
+            res.send( review );
+        } );
+
+        // POST API
+        app.post( '/user', async ( req, res ) => {
+            const user = req.body;
+            const result = await userCollection.insertOne( user );
+            res.json( result )
+        } );
+
+
+
+    }
+    finally {
+        // await client.close();
+    }
+}
+
+users().catch( console.dir );
+
+
 async function reviews() {
     try {
         await client.connect();
